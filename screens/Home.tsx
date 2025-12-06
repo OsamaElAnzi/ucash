@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import RecentTransactions from '../components/RecentTransactions';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -101,11 +102,18 @@ export default function Home() {
           {percentage.toFixed(0)}% van €{spaardoel}
         </Text>
       </View>
-
+      <RecentTransactions />
       {/* Floating Plus Button */}
-      <TouchableOpacity style={styles.floatingButton} onPress={openModal}>
-        <Ionicons name="add" size={30} color="#fff" />
-      </TouchableOpacity>
+        <TouchableOpacity
+            style={[
+                styles.floatingButton,
+                { bottom: 50 + insets.bottom }
+            ]}
+            onPress={openModal}
+            >
+            <Ionicons name="add" size={30} color="#fff" />
+        </TouchableOpacity>
+
 
       {/* Modal Bottom Sheet */}
       <Modal visible={modalVisible} transparent animationType="none">
@@ -249,7 +257,6 @@ const styles = StyleSheet.create({
 
   floatingButton: {
     position: 'absolute',
-    bottom: 90,
     right: 25,
     width: 60,
     height: 60,
