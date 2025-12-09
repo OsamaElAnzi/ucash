@@ -1,97 +1,104 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+U-Cash
 
-# Getting Started
+U-Cash is een geavanceerd geldmanagementsysteem dat je volledige controle geeft over je financiën. Of je nu contant geld beheert, digitale betalingen doet of pinautomaten zoekt in de buurt, U-Cash biedt alles wat je nodig hebt om je geld slim te beheren.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+🌟 Features
 
-## Step 1: Start Metro
+U-Cash is meer dan een gewone geld-app. Het biedt krachtige functionaliteiten:
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+Contant geldbeheer: Zie precies hoeveel je van elke biljet- of muntsoort hebt.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Pinautomaten zoeken in de buurt: Vind eenvoudig de dichtstbijzijnde geldautomaten met realtime informatie.
 
-```sh
-# Using npm
+Uitgaven bijhouden: Registreer inkomende en uitgaande bedragen en krijg inzicht in je uitgavenpatronen.
+
+Slimme rapportages: Analyseer je cashflow en ontvang waarschuwingen als je cashvoorraad laag wordt.
+
+Multi-account ondersteuning: Beheer meerdere wallets of accounts in één overzichtelijke app.
+
+Offline modus: Blijf je geld beheren, ook zonder internetverbinding.
+
+Veiligheid eerst: Alle data is versleuteld en lokaal opgeslagen, zodat alleen jij toegang hebt tot je financiële informatie.
+
+🚀 Getting Started
+
+Opmerking: Zorg dat je je ontwikkelomgeving hebt ingesteld volgens de React Native Set Up guide
+ voordat je verder gaat.
+
+1️⃣ Metro starten
+
+Start de Metro bundler vanuit de root van het project:
+
+# NPM
 npm start
 
-# OR using Yarn
+# OR Yarn
 yarn start
-```
 
-## Step 2: Build and run your app
+2️⃣ App bouwen en uitvoeren
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+Open een nieuw terminalvenster en gebruik de volgende commando’s:
 
-### Android
-
-```sh
-# Using npm
+Android
+# NPM
 npm run android
 
-# OR using Yarn
+# OR Yarn
 yarn android
-```
 
-### iOS
+iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+Zorg dat CocoaPods dependencies zijn geïnstalleerd:
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
 bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
 bundle exec pod install
-```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
 
-```sh
-# Using npm
+Run daarna de app:
+
+# NPM
 npm run ios
 
-# OR using Yarn
+# OR Yarn
 yarn ios
-```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+3️⃣ App aanpassen
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Open App.tsx en breng je wijzigingen aan. Dankzij Fast Refresh worden wijzigingen automatisch zichtbaar.
 
-## Step 3: Modify your app
+Android: Druk twee keer op <kbd>R</kbd> of gebruik het Dev Menu (Ctrl + M of Cmd + M) om te herladen.
 
-Now that you have successfully run the app, let's make changes!
+iOS: Druk op <kbd>R</kbd> in de iOS Simulator om te herladen.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+🎯 Waarom U-Cash?
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+U-Cash is niet zomaar een geld-app. Het is een compleet ecosysteem voor contant en digitaal geldbeheer:
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Perfect voor mensen die hun contante geld willen optimaliseren.
 
-## Congratulations! :tada:
+Handig voor financiële professionals of ondernemers die cashflow in realtime willen zien.
 
-You've successfully run and modified your React Native App. :partying_face:
+Slimme features zoals pinautomaten zoeken, cash tracking en multi-account management maken het een onmisbare tool.
 
-### Now what?
+📚 Meer leren
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+React Native Docs
+ – leer hoe React Native werkt
 
-# Troubleshooting
+U-Cash Features
+ – volledige overzicht van alle functies (link naar docs)
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+GitHub Repository
+ – open-source React Native
 
-# Learn More
+⚡ Pro Tips
 
-To learn more about React Native, take a look at the following resources:
+Voeg je eigen wallets toe en beheer biljetten/munten per account.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Gebruik de kaartfunctie om altijd een geldautomaat bij jou in de buurt te vinden.
+
+Analyseer je cashstromen met slimme rapportages en statistieken.
+
+🎉 Gefeliciteerd! Je hebt de U-Cash app succesvol opgezet en kunt nu je geld slim beheren.
+
+U-Cash: Het ultieme platform voor complete financiële controle. 💰💳
