@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   FlatList,
-  Alert
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -19,6 +19,7 @@ import RecentTransactions from '../components/RecentTransactions';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTransaction } from '../store/slices/transactionsSlice';
 import { RootState } from '../store/store';
+import { selectCashOverview } from '../store/selectors/transactionsSelectors';
 
 
 
@@ -28,11 +29,15 @@ export default function Home() {
   const insets = useSafeAreaInsets();
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+  const cashOverview = useSelector((state: RootState) => selectCashOverview(state));
+
 
   // Nieuwe transactie inputs
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | null>(null);
   const [transactionName, setTransactionName] = useState('');
   const [transactionAmount, setTransactionAmount] = useState('');
+  const [remainingAmount, setRemainingAmount] = useState<number>(0);
+
 
   // Biljetten / munten
   const [showCashOptions, setShowCashOptions] = useState(false);
@@ -50,6 +55,24 @@ export default function Home() {
 
   const spaardoel = 2000;
   const percentage = (totalSaldo / spaardoel) * 100;
+
+  useEffect(() => {
+    setRemainingAmount(Number(transactionAmount));
+  }, [transactionAmount]);
+
+  const removeCash = (denomination: string) => {
+    const item = cashSelection.find(c => c.denomination === denomination);
+    if (!item) return;
+
+    // Voeg het aantal terug bij remainingAmount
+    setRemainingAmount(prev => prev + (item.count * item.value) / 100);
+
+    // Verwijder uit cashSelection
+    setCashSelection(prev =>
+      prev.filter(c => c.denomination !== denomination)
+    );
+  };
+
 
   const openModal = () => {
     setModalVisible(true);
@@ -98,18 +121,46 @@ export default function Home() {
     return valueMap[denomination] || 0;
   };
 
-  const addCash = (denomination: string) => {
-    if (!countInputs[denomination]) return;
-    console.log('LOG addCash> \n',denomination, countInputs);
+  const addCash = (denomination: string, manualCount?: number) => {
+    if (remainingAmount <= 0 && manualCount === undefined) {
+      Alert.alert("Geen bedrag meer over om te verdelen");
+      return;
+    }
+
+    const value = getDenominationValue(denomination); // in centen
+    let count = 0;
+
+    if (manualCount !== undefined) {
+      count = manualCount;
+      if (count * value > remainingAmount * 100) {
+        Alert.alert("Te veel voor het resterende bedrag");
+        return;
+      }
+    } else {
+      const amountInCents = Math.round(remainingAmount * 100);
+      count = Math.floor(amountInCents / value);
+      if (count <= 0) {
+        Alert.alert(`Dit biljet/munt is te groot voor het resterende bedrag`);
+        return;
+      }
+    }
+
     const existing = cashSelection.find(c => c.denomination === denomination);
     if (existing) {
-      existing.count += parseInt(countInputs[denomination]);
-      setCashSelection([...cashSelection]);
+      existing.count += count;
     } else {
-      setCashSelection([...cashSelection, { denomination, count: parseInt(countInputs[denomination]), value: getDenominationValue(denomination) }]);
+      cashSelection.push({ denomination, count, value });
     }
-    setCountInputs({});
+
+    setCashSelection([...cashSelection]);
+
+    // Update resterend bedrag
+    setRemainingAmount((prev) => prev - (count * value) / 100);
   };
+
+
+
+
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
@@ -127,15 +178,15 @@ export default function Home() {
       </View>
       <RecentTransactions />
       {/* Floating Plus Button */}
-        <TouchableOpacity
-            style={[
-                styles.floatingButton,
-                { bottom: 50 + insets.bottom }
-            ]}
-            onPress={openModal}
-            >
-            <Ionicons name="add" size={30} color="#fff" />
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.floatingButton,
+          { bottom: 50 + insets.bottom }
+        ]}
+        onPress={openModal}
+      >
+        <Ionicons name="add" size={30} color="#fff" />
+      </TouchableOpacity>
 
 
       {/* Modal Bottom Sheet */}
@@ -231,64 +282,64 @@ export default function Home() {
                       data={cashType === 'biljetten' ? bills : coins}
                       keyExtractor={(item) => item}
                       renderItem={({ item }) => (
-                        <View style={styles.cashRow}>
-                          <Text>{item}</Text>
-                          <TextInput
-                            style={styles.inputSmall}
-                            placeholder="Aantal"
-                            placeholderTextColor="#888"
-                            keyboardType="numeric"
-                            value={countInputs[item]} // item = denomination
-                            onChangeText={(text) =>
-                              setCountInputs((prev) => ({ ...prev, [item]: text }))
-                            }
-                          />
-                          <TouchableOpacity style={styles.addButton} onPress={() => addCash(item)}>
-                            <Text style={{ color: '#fff' }}>+</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+
+                          {/* Klik voor automatische berekening */}
+                          <TouchableOpacity
+                            onPress={() => addCash(item)}
+                            style={{
+                              padding: 12,
+                              borderWidth: 1,
+                              borderColor: '#ddd',
+                              borderRadius: 8,
+                              marginRight: 10,
+                              flex: 1,
+                            }}
+                          >
+                            <Text style={{ fontSize: 16 }}>{item}</Text>
                           </TouchableOpacity>
+
+                          {/* Handmatige input */}
+                          <TextInput
+                            style={{
+                              borderWidth: 1,
+                              borderColor: '#ddd',
+                              borderRadius: 8,
+                              padding: 8,
+                              width: 60,
+                              textAlign: 'center',
+                            }}
+                            placeholder="Aantal"
+                            placeholderTextColor={'#888'}
+                            keyboardType="numeric"
+                            value={countInputs[item] || ''}
+                            onChangeText={(text) =>
+                              setCountInputs(prev => ({ ...prev, [item]: text }))
+                            }
+                            onEndEditing={() => {
+                              if (countInputs[item]) {
+                                addCash(item, parseInt(countInputs[item]));
+                                setCountInputs(prev => ({ ...prev, [item]: '' }));
+                              }
+                            }}
+                          />
                         </View>
                       )}
                     />
 
-                    <Text style={{ fontWeight: '700', marginTop: 10 }}>Overzicht:</Text>
-                      {cashSelection.map((c) => (
-                        <View
-                          key={c.denomination}
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            paddingVertical: 6,
-                            paddingHorizontal: 10,
-                            backgroundColor: '#f0f0f0',
-                            borderRadius: 10,
-                            marginVertical: 4,
-                          }}
-                        >
-                          <Text style={{ fontSize: 16 }}>
-                            {c.denomination} × {c.count}
-                          </Text>
 
-                          {/* Rode verwijderknop */}
-                          <TouchableOpacity
-                            onPress={() => {
-                              setCashSelection(prev =>
-                                prev.filter(item => item.denomination !== c.denomination)
-                              );
-                            }}
-                            style={{
-                              backgroundColor: '#f44336',
-                              borderRadius: 12,
-                              paddingHorizontal: 8,
-                              paddingVertical: 2,
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                            }}
-                          >
-                            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>−</Text>
-                          </TouchableOpacity>
-                        </View>
-                      ))}
+
+
+                    <Text style={{ fontWeight: '700', marginTop: 10 }}>Overzicht:</Text>
+                    {cashSelection.map(c => (
+                      <View key={c.denomination} style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 4 }}>
+                        <Text>{c.denomination} × {c.count}</Text>
+                        <TouchableOpacity onPress={() => removeCash(c.denomination)} style={{ backgroundColor: 'red', borderRadius: 12, padding: 6 }}>
+                          <Text style={{ color: '#fff' }}>−</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+
 
 
                     <TouchableOpacity
