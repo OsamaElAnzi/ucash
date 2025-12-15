@@ -1,22 +1,22 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
-
-type Transaction = {
-  id: string;
-  name: string;
-  amount: number;
-  type: 'income' | 'expense';
-};
-
-const dummyTransactions: Transaction[] = [
-  { id: '1', name: 'Lunch', amount: 12, type: 'expense' },
-  { id: '2', name: 'Salary', amount: 1200, type: 'income' },
-  { id: '3', name: 'Groceries', amount: 45, type: 'expense' },
-  { id: '4', name: 'Freelance', amount: 300, type: 'income' },
-];
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 
 export default function RecentTransactions() {
-  const lastThree = dummyTransactions.slice(-3).reverse(); // nieuwste eerst
+  const transactions = useSelector(
+    (state: RootState) => state.transactions.transactions
+  );
+
+  const lastThree = [...transactions].slice(0, 3);
+
+  if (lastThree.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ opacity: 0.6 }}>Nog geen transacties</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -26,7 +26,12 @@ export default function RecentTransactions() {
         renderItem={({ item }) => (
           <View style={styles.transactionCard}>
             <Text style={styles.name}>{item.name}</Text>
-            <Text style={[styles.amount, item.type === 'income' ? styles.income : styles.expense]}>
+            <Text
+              style={[
+                styles.amount,
+                item.type === 'income' ? styles.income : styles.expense,
+              ]}
+            >
               {item.type === 'income' ? '+' : '-'}€{item.amount}
             </Text>
           </View>

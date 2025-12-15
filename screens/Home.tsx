@@ -11,10 +11,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   FlatList,
+  Alert
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import RecentTransactions from '../components/RecentTransactions';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTransaction } from '../store/slices/transactionsSlice';
+import { RootState } from '../store/store';
+
+
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -31,14 +37,17 @@ export default function Home() {
   // Biljetten / munten
   const [showCashOptions, setShowCashOptions] = useState(false);
   const [cashType, setCashType] = useState<'biljetten' | 'munten' | null>(null);
-  const [cashSelection, setCashSelection] = useState<{ denomination: string; count: number }[]>([]);
-  const [countInput, setCountInput] = useState('');
+  const [cashSelection, setCashSelection] = useState<{ denomination: string; count: number; value: number }[]>([]);
+  const [countInputs, setCountInputs] = useState<{ [key: string]: string }>({});
 
   const bills = ['€5', '€10', '€20', '€50', '€100', '€200'];
   const coins = ['1c', '5c', '10c', '20c', '50c', '€1', '€2'];
 
   // Fake data
-  const totalSaldo = 1250;
+  const totalSaldo = useSelector(
+    (state: RootState) => state.transactions.totalSaldo
+  );
+
   const spaardoel = 2000;
   const percentage = (totalSaldo / spaardoel) * 100;
 
@@ -64,28 +73,42 @@ export default function Home() {
       setShowCashOptions(false);
       setCashType(null);
       setCashSelection([]);
-      setCountInput('');
+      setCountInputs({});
     });
   };
 
+  const dispatch = useDispatch();
+
   const submitTransaction = () => {
-    console.log('Type:', transactionType);
-    console.log('Naam:', transactionName);
-    console.log('Bedrag:', transactionAmount);
-    console.log('Cash:', cashSelection);
-    closeModal();
+    try {
+      dispatch(addTransaction(transactionType!, transactionName, Number(transactionAmount), cashSelection));
+      closeModal();
+    } catch (err: any) {
+      Alert.alert(err.message); // toon melding als er niet genoeg cash is
+    }
+  };
+
+
+
+  const getDenominationValue = (denomination: string): number => {
+    const valueMap: { [key: string]: number } = {
+      '€5': 500, '€10': 1000, '€20': 2000, '€50': 5000, '€100': 10000, '€200': 20000,
+      '1c': 1, '5c': 5, '10c': 10, '20c': 20, '50c': 50, '€1': 100, '€2': 200,
+    };
+    return valueMap[denomination] || 0;
   };
 
   const addCash = (denomination: string) => {
-    if (!countInput) return;
+    if (!countInputs[denomination]) return;
+    console.log('LOG addCash> \n',denomination, countInputs);
     const existing = cashSelection.find(c => c.denomination === denomination);
     if (existing) {
-      existing.count += parseInt(countInput);
+      existing.count += parseInt(countInputs[denomination]);
       setCashSelection([...cashSelection]);
     } else {
-      setCashSelection([...cashSelection, { denomination, count: parseInt(countInput) }]);
+      setCashSelection([...cashSelection, { denomination, count: parseInt(countInputs[denomination]), value: getDenominationValue(denomination) }]);
     }
-    setCountInput('');
+    setCountInputs({});
   };
 
   return (
@@ -158,23 +181,30 @@ export default function Home() {
                 <TextInput
                   style={styles.input}
                   placeholder="Naam van transactie"
+                  placeholderTextColor="#888"
                   value={transactionName}
                   onChangeText={setTransactionName}
                 />
                 <TextInput
                   style={styles.input}
                   placeholder="Bedrag"
+                  placeholderTextColor="#888"
                   value={transactionAmount}
                   onChangeText={setTransactionAmount}
                   keyboardType="numeric"
                 />
 
                 <TouchableOpacity
-                  style={[styles.submitButton, !transactionType && { opacity: 0.5 }]}
-                  disabled={!transactionType}
+                  style={[
+                    styles.submitButton,
+                    (!transactionType || !transactionAmount) && { opacity: 0.5 }
+                  ]}
+                  disabled={!transactionType || !transactionAmount} // hier wordt het verplicht
                   onPress={() => setShowCashOptions(true)}
                 >
-                  <Text style={styles.submitButtonText}>Volgende: Biljetten/Munten</Text>
+                  <Text style={styles.submitButtonText}>
+                    Volgende: Biljetten/Munten
+                  </Text>
                 </TouchableOpacity>
               </>
             ) : (
@@ -206,9 +236,12 @@ export default function Home() {
                           <TextInput
                             style={styles.inputSmall}
                             placeholder="Aantal"
+                            placeholderTextColor="#888"
                             keyboardType="numeric"
-                            value={countInput}
-                            onChangeText={setCountInput}
+                            value={countInputs[item]} // item = denomination
+                            onChangeText={(text) =>
+                              setCountInputs((prev) => ({ ...prev, [item]: text }))
+                            }
                           />
                           <TouchableOpacity style={styles.addButton} onPress={() => addCash(item)}>
                             <Text style={{ color: '#fff' }}>+</Text>
@@ -218,11 +251,45 @@ export default function Home() {
                     />
 
                     <Text style={{ fontWeight: '700', marginTop: 10 }}>Overzicht:</Text>
-                    {cashSelection.map((c) => (
-                      <Text key={c.denomination}>
-                        {c.denomination} × {c.count}
-                      </Text>
-                    ))}
+                      {cashSelection.map((c) => (
+                        <View
+                          key={c.denomination}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            paddingVertical: 6,
+                            paddingHorizontal: 10,
+                            backgroundColor: '#f0f0f0',
+                            borderRadius: 10,
+                            marginVertical: 4,
+                          }}
+                        >
+                          <Text style={{ fontSize: 16 }}>
+                            {c.denomination} × {c.count}
+                          </Text>
+
+                          {/* Rode verwijderknop */}
+                          <TouchableOpacity
+                            onPress={() => {
+                              setCashSelection(prev =>
+                                prev.filter(item => item.denomination !== c.denomination)
+                              );
+                            }}
+                            style={{
+                              backgroundColor: '#f44336',
+                              borderRadius: 12,
+                              paddingHorizontal: 8,
+                              paddingVertical: 2,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>−</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+
 
                     <TouchableOpacity
                       style={[styles.submitButton, { marginTop: 10 }]}
