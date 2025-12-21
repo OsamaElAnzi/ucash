@@ -6,10 +6,12 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
+  Platform,
 } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 type RootStackParamList = {
   TransactionDetails: { item: Transaction };
@@ -34,6 +36,9 @@ export default function Transactions() {
   const [searchPrice, setSearchPrice] = useState('');
   const [searchDate, setSearchDate] = useState('');
 
+  // Kalender picker state
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   // Filtering
   const filtered = transactions.filter(t => {
     const nameMatch = t.name.toLowerCase().includes(searchName.toLowerCase());
@@ -46,8 +51,10 @@ export default function Transactions() {
   });
 
   const renderItem = ({ item }: { item: Transaction }) => (
-    <TouchableOpacity style={styles.item}
-    onPress={() => navigation.navigate('TransactionDetails', { item })}>
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() => navigation.navigate('TransactionDetails', { item })}
+    >
       <View>
         <Text style={styles.itemName}>{item.name}</Text>
         <Text style={styles.itemDate}>{item.createdAt}</Text>
@@ -56,30 +63,51 @@ export default function Transactions() {
     </TouchableOpacity>
   );
 
+  // Datum selecteren via kalender
+  const onChangeDate = (event: any, selected?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios'); // bij iOS blijft open
+    if (selected) {
+      const formatted = selected.toISOString().split('T')[0]; // YYYY-MM-DD
+      setSearchDate(formatted);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Transacties</Text>
 
       <View style={styles.filterContainer}>
         <TextInput
+          placeholderTextColor={'#888'}
           placeholder="Filter op naam"
           style={styles.input}
           value={searchName}
           onChangeText={setSearchName}
         />
         <TextInput
-          placeholder="Filter op prijs"
+          placeholderTextColor={'#888'}
+          placeholder="Filter op bedrag"
           style={styles.input}
           value={searchPrice}
           onChangeText={setSearchPrice}
           keyboardType="numeric"
         />
-        <TextInput
-          placeholder="Filter op datum (YYYY-MM-DD)"
+        <TouchableOpacity
+          onPress={() => setShowDatePicker(true)}
           style={styles.input}
-          value={searchDate}
-          onChangeText={setSearchDate}
-        />
+        >
+          <Text style={{ color: searchDate ? '#000' : '#888' }}>
+            {searchDate || 'Selecteer datum'}
+          </Text>
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            value={searchDate ? new Date(searchDate) : new Date()}
+            mode="date"
+            display="calendar"
+            onChange={onChangeDate}
+          />
+        )}
       </View>
 
       <FlatList
