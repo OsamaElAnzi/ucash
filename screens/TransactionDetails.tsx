@@ -1,17 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
+import { Transaction } from './Transactions'; // Importeer het type
 
 type TransactionDetailsRouteParams = {
-  item: { name: string; price: number; date: string };
+  item: Transaction;
 };
 
 export default function TransactionDetails() {
   const route = useRoute();
   const { item } = route.params as TransactionDetailsRouteParams;
 
+  if (!item) {
+    return (
+      <View style={styles.container}>
+        <Text>Geen transactie gevonden</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>Transactie Details</Text>
 
       <View style={styles.box}>
@@ -19,17 +28,25 @@ export default function TransactionDetails() {
         <Text style={styles.value}>{item.name}</Text>
 
         <Text style={styles.label}>Prijs</Text>
-        <Text style={styles.value}>€{item.price}</Text>
+        <Text style={styles.value}>€{item.amount?.toFixed(2) ?? item.amount}</Text>
 
         <Text style={styles.label}>Datum</Text>
-        <Text style={styles.value}>{item.date}</Text>
+        <Text style={styles.value}>{item.createdAt ?? item.createdAt}</Text>
+
+        <Text style={styles.label}>Type</Text>
+        <Text style={styles.value}>{item.type}</Text>
+
+        <Text style={styles.label}>Betaalwijze</Text>
+        <Text style={styles.value}>
+          {item.physicalType === 'contant' ? 'Contant' : 'Contantlose'}
+        </Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: 40 },
+  container: { flex: 1, padding: 20, paddingTop: 40, backgroundColor: '#f7f7f7' },
   title: { fontSize: 28, fontWeight: '700', marginBottom: 20 },
 
   box: {

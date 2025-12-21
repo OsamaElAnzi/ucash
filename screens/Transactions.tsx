@@ -8,52 +8,51 @@ import {
   FlatList,
 } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 
 type RootStackParamList = {
   TransactionDetails: { item: Transaction };
 };
 
-interface Transaction {
+export interface Transaction {
   id: string;
   name: string;
-  price: number;
-  date: string;
+  amount: number;
+  createdAt: string;
+  type: 'income' | 'expense';
+  physicalType: 'contant' | 'contantlose';
 }
 
 export default function Transactions() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
+  // Redux transactions ophalen
+  const transactions = useSelector((state: RootState) => state.transactions.transactions);
+
   const [searchName, setSearchName] = useState('');
   const [searchPrice, setSearchPrice] = useState('');
   const [searchDate, setSearchDate] = useState('');
 
-  // Fake data
-  const [transactions] = useState<Transaction[]>([
-    { id: '1', name: 'Boodschappen', price: 40, date: '2025-01-12' },
-    { id: '2', name: 'Salaris', price: 2000, date: '2025-01-10' },
-    { id: '3', name: 'Netflix', price: 12, date: '2025-01-05' },
-    { id: '4', name: 'Benzine', price: 65, date: '2025-01-03' },
-  ]);
-
   // Filtering
   const filtered = transactions.filter(t => {
-    return (
-      t.name.toLowerCase().includes(searchName.toLowerCase()) &&
-      (searchPrice === '' || t.price.toString().includes(searchPrice)) &&
-      t.date.includes(searchDate)
-    );
+    const nameMatch = t.name.toLowerCase().includes(searchName.toLowerCase());
+    const priceMatch =
+      searchPrice === '' || t.amount === Number(searchPrice);
+    const dateMatch =
+      searchDate === '' || t.createdAt.includes(searchDate);
+
+    return nameMatch && priceMatch && dateMatch;
   });
 
   const renderItem = ({ item }: { item: Transaction }) => (
-    <TouchableOpacity
-      style={styles.item}
-      onPress={() => navigation.navigate('TransactionDetails', { item })}
-    >
+    <TouchableOpacity style={styles.item}
+    onPress={() => navigation.navigate('TransactionDetails', { item })}>
       <View>
         <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemDate}>{item.date}</Text>
+        <Text style={styles.itemDate}>{item.createdAt}</Text>
       </View>
-      <Text style={styles.itemPrice}>€{item.price}</Text>
+      <Text style={styles.itemPrice}>€{item.amount}</Text>
     </TouchableOpacity>
   );
 
@@ -61,7 +60,6 @@ export default function Transactions() {
     <View style={styles.container}>
       <Text style={styles.title}>Transacties</Text>
 
-      {/* Filters */}
       <View style={styles.filterContainer}>
         <TextInput
           placeholder="Filter op naam"
@@ -95,7 +93,7 @@ export default function Transactions() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: 30 },
+  container: { flex: 1, padding: 20, paddingTop: 30, backgroundColor: '#f7f7f7' },
   title: { fontSize: 28, fontWeight: '600', marginBottom: 20 },
 
   filterContainer: { marginBottom: 20 },
