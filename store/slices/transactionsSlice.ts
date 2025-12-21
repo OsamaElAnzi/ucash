@@ -17,53 +17,55 @@ const transactionsSlice = createSlice({
   initialState,
   reducers: {
     addTransaction: {
-  reducer(state, action: PayloadAction<Transaction>) {
-    const tx = action.payload;
+      reducer(state, action: PayloadAction<Transaction>) {
+        const tx = action.payload;
 
-    // Check of het een expense is
-    if (tx.type === 'expense') {
-      // Controleer of er genoeg cash is van elke denomination
-      const cashOverview = state.transactions.reduce((map, t) => {
-        t.cash.forEach(c => {
-          map[c.denomination] = (map[c.denomination] || 0) + (t.type === 'income' ? c.count : -c.count);
-        });
-        return map;
-      }, {} as Record<string, number>);
+        // Check of het een expense is
+        if (tx.type === 'expense') {
+          // Controleer of er genoeg cash is van elke denomination
+          const cashOverview = state.transactions.reduce((map, t) => {
+            t.cash.forEach(c => {
+              map[c.denomination] = (map[c.denomination] || 0) + (t.type === 'income' ? c.count : -c.count);
+            });
+            return map;
+          }, {} as Record<string, number>);
 
-      for (let item of tx.cash) {
-        if ((cashOverview[item.denomination] || 0) < item.count) {
-          throw new Error(`Je hebt niet genoeg ${item.denomination}`);
+          for (let item of tx.cash) {
+            if ((cashOverview[item.denomination] || 0) < item.count) {
+              throw new Error(`Je hebt niet genoeg ${item.denomination}`);
+            }
+          }
         }
-      }
-    }
 
-    // Voeg transactie toe
-    state.transactions.unshift(tx);
+        // Voeg transactie toe
+        state.transactions.unshift(tx);
 
-    // Update totalSaldo
-    if (tx.type === 'income') {
-      state.totalSaldo += tx.amount;
-    } else {
-      state.totalSaldo -= tx.amount;
-    }
-  },
-  prepare(
-    type: 'income' | 'expense',
-    name: string,
-    amount: number,
-    cash: CashItem[]
-  ) {
-    return {
-      payload: {
-        id: nanoid(),
-        type,
-        name,
-        amount,
-        cash,
-        createdAt: new Date().toISOString(),
-      } as Transaction,
-    };
-  },
+        // Update totalSaldo
+        if (tx.type === 'income') {
+          state.totalSaldo += tx.amount;
+        } else {
+          state.totalSaldo -= tx.amount;
+        }
+      },
+      prepare(
+        type: 'income' | 'expense',
+        name: string,
+        amount: number,
+        cash: CashItem[],
+        physicalType: 'cash' | 'contantlose'
+      ) {
+        return {
+          payload: {
+            id: nanoid(),
+            type,
+            name,
+            amount,
+            cash,
+            physicalType,
+            createdAt: new Date().toISOString(),
+          } as Transaction,
+        };
+      },
     },
   },
 });

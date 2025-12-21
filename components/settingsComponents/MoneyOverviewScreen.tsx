@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
 import { selectCashOverview } from '../../store/selectors/transactionsSelectors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type CashItem = {
   denomination: string;
@@ -10,12 +11,13 @@ type CashItem = {
 };
 
 export default function MoneyOverviewScreen() {
-  const [type, setType] = useState<'coins' | 'bills'>('bills');
+  const [type, setType] = useState<'coins' | 'bills' | 'contantlose'>('bills');
 
   // Haal de cash-overview op uit Redux
-  const { coins, bills } = useSelector(selectCashOverview);
+  const cashOverview = useSelector(selectCashOverview);
+  const { coins = [], bills = [], contantloseTotal = 0 } = cashOverview || {};
 
-  // Masterlijsten zodat alle biljetten/munten altijd zichtbaar zijn
+  // Masterlijsten zodat lege biljetten/munten altijd zichtbaar zijn
   const allBills: CashItem[] = [
     { denomination: '€5', value: 5, count: 0 },
     { denomination: '€10', value: 10, count: 0 },
@@ -35,19 +37,27 @@ export default function MoneyOverviewScreen() {
     { denomination: '€2', value: 2, count: 0 },
   ];
 
-  // Merge Redux-data met masterlijst
-  const mergeData = (master: CashItem[], data: CashItem[]) =>
+  // Merge Redux-data met masterlijst zodat lege items altijd zichtbaar zijn
+  const mergeData = (master: CashItem[], data: CashItem[]): CashItem[] =>
     master.map(item => {
       const found = data.find(d => d.denomination === item.denomination);
       return { ...item, count: found ? found.count : 0 };
     });
+  // Bepaal welke data getoond wordt
+  const data: CashItem[] =
+  type === 'coins'
+    ? mergeData(allCoins, coins)
+    : type === 'bills'
+    ? mergeData(allBills, bills)
+    : [];
 
-  const data = type === 'coins' ? mergeData(allCoins, coins) : mergeData(allBills, bills);
 
+  // Bereken totaalbedrag
+  const totalAmountCard = type === 'contantlose' ? contantloseTotal : 0;
   const totalAmount = data.reduce((sum, item) => sum + item.value * item.count, 0);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Geld Overzicht</Text>
 
       {/* Switcher */}
@@ -64,10 +74,18 @@ export default function MoneyOverviewScreen() {
         >
           <Text style={[styles.switchText, type === 'bills' && styles.activeText]}>Biljetten</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.switchButton, type === 'contantlose' && styles.activeSwitch]}
+          onPress={() => setType('contantlose')}
+        >
+          <Text style={[styles.switchText, type === 'contantlose' && styles.activeText]}>
+            Contantlose
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Tabel */}
-      <View style={styles.table}>
+      <SafeAreaView style={styles.table}>
         <View style={[styles.row, styles.headerRow]}>
           <Text style={[styles.cell, styles.headerCell]}>Denomination</Text>
           <Text style={[styles.cell, styles.headerCell]}>Aantal</Text>
@@ -75,22 +93,34 @@ export default function MoneyOverviewScreen() {
         </View>
 
         <ScrollView style={{ flex: 1 }}>
-          {data.map(item => (
-            <View key={item.denomination} style={styles.row}>
-              <Text style={styles.cell}>{item.denomination}</Text>
-              <Text style={styles.cell}>{item.count}</Text>
-              <Text style={styles.cell}>{(item.value * item.count).toFixed(2)}</Text>
+          {type === 'contantlose' ? (
+            <View style={styles.row}>
+              <Text style={styles.cell}>Contantloos</Text>
+              <Text style={styles.cell}>–</Text>
+              <Text style={styles.cell}>{contantloseTotal.toFixed(2)}</Text>
             </View>
-          ))}
+          ) : (
+            data.map(item => (
+              <View key={item.denomination} style={styles.row}>
+                <Text style={styles.cell}>{item.denomination}</Text>
+                <Text style={styles.cell}>{item.count}</Text>
+                <Text style={styles.cell}>{(item.value * item.count).toFixed(2)}</Text>
+              </View>
+            ))
+          )}
         </ScrollView>
 
         <View style={[styles.row, styles.totalRow]}>
           <Text style={styles.totalText}>Totaal</Text>
           <Text style={styles.totalText}></Text>
-          <Text style={styles.totalText}>{totalAmount.toFixed(2)} €</Text>
+          {type === 'contantlose' ? (
+            <Text style={styles.totalText}>{totalAmountCard.toFixed(2)} €</Text>
+          ) : (
+            <Text style={styles.totalText}>{totalAmount.toFixed(2)} €</Text>
+          )}
         </View>
-      </View>
-    </View>
+      </SafeAreaView>
+    </SafeAreaView>
   );
 }
 

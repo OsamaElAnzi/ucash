@@ -34,6 +34,7 @@ export default function Home() {
 
   // Nieuwe transactie inputs
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | null>(null);
+  const [physicalType, setPhysicalType] = useState<'contant' | 'contantlose' | null>(null);
   const [transactionName, setTransactionName] = useState('');
   const [transactionAmount, setTransactionAmount] = useState('');
   const [remainingAmount, setRemainingAmount] = useState<number>(0);
@@ -103,13 +104,34 @@ export default function Home() {
   const dispatch = useDispatch();
 
   const submitTransaction = () => {
-    try {
-      dispatch(addTransaction(transactionType!, transactionName, Number(transactionAmount), cashSelection));
-      closeModal();
-    } catch (err: any) {
-      Alert.alert(err.message); // toon melding als er niet genoeg cash is
-    }
-  };
+  if (!transactionType || !transactionAmount) return;
+
+  let finalCashSelection = [...cashSelection];
+
+  // Voor contantlose betalingen: voeg direct 1 "Contantlose" entry toe
+  if (physicalType === 'contantlose') {
+    finalCashSelection = [
+      { denomination: 'contantlose', count: 1, value: Number(transactionAmount) * 100 }
+    ];
+    console.log(finalCashSelection);
+  }
+
+  try {
+    dispatch(
+      addTransaction(
+        transactionType!,
+        transactionName,
+        Number(transactionAmount),
+        finalCashSelection,
+        physicalType === 'contant' ? 'cash' : 'contantlose'
+      )
+    );
+    closeModal();
+  } catch (err: any) {
+    Alert.alert(err.message);
+  }
+};
+
 
 
 
@@ -208,6 +230,30 @@ export default function Home() {
                   <TouchableOpacity
                     style={[
                       styles.typeButton,
+                      physicalType === 'contant' && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setPhysicalType('contant')}
+                  >
+                    <Ionicons name="cash-outline" size={28} />
+                    <Text style={styles.typeText}>Contant</Text>
+
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      physicalType === 'contantlose' && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setPhysicalType('contantlose')}
+                  >
+                    <Ionicons name="card-outline" size={28} />
+                    <Text style={styles.typeText}>Contant lose</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.typeContainer}>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
                       transactionType === 'income' && styles.typeButtonActive,
                     ]}
                     onPress={() => setTransactionType('income')}
@@ -244,19 +290,32 @@ export default function Home() {
                   onChangeText={setTransactionAmount}
                   keyboardType="numeric"
                 />
-
+                {physicalType === 'contant' && (
                 <TouchableOpacity
                   style={[
                     styles.submitButton,
                     (!transactionType || !transactionAmount) && { opacity: 0.5 }
                   ]}
-                  disabled={!transactionType || !transactionAmount} // hier wordt het verplicht
+                  disabled={(!transactionType || !transactionAmount)} // hier wordt het verplicht
                   onPress={() => setShowCashOptions(true)}
                 >
                   <Text style={styles.submitButtonText}>
                     Volgende: Biljetten/Munten
                   </Text>
                 </TouchableOpacity>
+                )}
+                {physicalType === 'contantlose' && (
+                <TouchableOpacity
+                      style={[
+                    styles.submitButton,
+                    (!transactionType || !transactionAmount) && { opacity: 0.5 }
+                    ]}
+                    disabled={transactionType && transactionAmount ? false : true}
+                      onPress={submitTransaction}
+                    >
+                      <Text style={styles.submitButtonText}>Opslaan Transactie</Text>
+                    </TouchableOpacity>
+                )}
               </>
             ) : (
               <>

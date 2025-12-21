@@ -18,12 +18,24 @@ export const selectCashOverview = createSelector(
   [selectTransactions],
   (transactions) => {
     const cashMap = new Map<string, number>();
+    let contantloseTotal = 0;
 
     transactions.forEach(tx => {
-      tx.cash.forEach((item: CashItem) => {
+
+      // ✅ CONTANTLOOS = amount gebruiken
+      if (tx.physicalType === 'contantlose') {
+        contantloseTotal += tx.type === 'income'
+          ? tx.amount
+          : -tx.amount;
+        return;
+      }
+
+      // ✅ CASH = denominations verwerken
+      tx.cash.forEach(item => {
         cashMap.set(
           item.denomination,
-          (cashMap.get(item.denomination) || 0) + item.count
+          (cashMap.get(item.denomination) || 0) +
+          (tx.type === 'income' ? item.count : -item.count)
         );
       });
     });
@@ -39,6 +51,8 @@ export const selectCashOverview = createSelector(
     return {
       coins: cashItems.filter(c => isCoin(c.value)),
       bills: cashItems.filter(c => !isCoin(c.value)),
+      contantloseTotal,
     };
   }
 );
+

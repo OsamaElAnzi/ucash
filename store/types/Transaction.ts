@@ -12,4 +12,5 @@ export type Transaction = {
   amount: number;
   cash: CashItem[];
   createdAt: string;
+  physicalType: 'cash' | 'contantlose';
 };
