@@ -31,25 +31,23 @@ export default function Home() {
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
   const cashOverview = useSelector((state: RootState) => selectCashOverview(state));
 
-
-  // Nieuwe transactie inputs
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | null>(null);
   const [physicalType, setPhysicalType] = useState<'contant' | 'contantlose' | null>(null);
   const [transactionName, setTransactionName] = useState('');
+  const [amountError, setAmountError] = useState<string | null>(null); 
   const [transactionAmount, setTransactionAmount] = useState('');
   const [remainingAmount, setRemainingAmount] = useState<number>(0);
 
-
-  // Biljetten / munten
   const [showCashOptions, setShowCashOptions] = useState(false);
   const [cashType, setCashType] = useState<'biljetten' | 'munten' | null>(null);
   const [cashSelection, setCashSelection] = useState<{ denomination: string; count: number; value: number }[]>([]);
   const [countInputs, setCountInputs] = useState<{ [key: string]: string }>({});
 
+  const isAmountValid = !!transactionType && !!transactionAmount && amountError !== null;
+
   const bills = ['€5', '€10', '€20', '€50', '€100', '€200'];
   const coins = ['1c', '5c', '10c', '20c', '50c', '€1', '€2'];
 
-  // Fake data
   const totalSaldo = useSelector(
     (state: RootState) => state.transactions.totalSaldo
   );
@@ -65,10 +63,8 @@ export default function Home() {
     const item = cashSelection.find(c => c.denomination === denomination);
     if (!item) return;
 
-    // Voeg het aantal terug bij remainingAmount
     setRemainingAmount(prev => prev + (item.count * item.value) / 100);
 
-    // Verwijder uit cashSelection
     setCashSelection(prev =>
       prev.filter(c => c.denomination !== denomination)
     );
@@ -108,7 +104,6 @@ export default function Home() {
 
   let finalCashSelection = [...cashSelection];
 
-  // Voor contantlose betalingen: voeg direct 1 "Contantlose" entry toe
   if (physicalType === 'contantlose') {
     finalCashSelection = [
       { denomination: 'contantlose', count: 1, value: Number(transactionAmount) * 100 }
@@ -149,7 +144,7 @@ export default function Home() {
       return;
     }
 
-    const value = getDenominationValue(denomination); // in centen
+    const value = getDenominationValue(denomination);
     let count = 0;
 
     if (manualCount !== undefined) {
@@ -176,13 +171,31 @@ export default function Home() {
 
     setCashSelection([...cashSelection]);
 
-    // Update resterend bedrag
     setRemainingAmount((prev) => prev - (count * value) / 100);
   };
 
 
+const handleAmountChange = (text: string) => {
+  validateAmount(text);
+  setTransactionAmount(text);
+};
 
+const validateAmount = (text: string) => {
+  // Alleen cijfers en max 1 punt
+  if (!/^\d*\.?\d*$/.test(text)) {
+    setAmountError('Gebruik alleen cijfers en één punt (.)');
+    return;
+  }
 
+  // Max 2 decimalen
+  const parts = text.split('.');
+  if (parts[1] && parts[1].length > 2) {
+    setAmountError('Maximaal 2 cijfers na de punt');
+    return;
+  }
+
+  setAmountError(null);
+};
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
@@ -282,14 +295,22 @@ export default function Home() {
                   value={transactionName}
                   onChangeText={setTransactionName}
                 />
-                <TextInput
-                  style={styles.input}
+               <TextInput
+                  style={[
+                    styles.input,
+                    amountError && { borderColor: 'red' },
+                  ]}
                   placeholder="Bedrag"
                   placeholderTextColor="#888"
                   value={transactionAmount}
-                  onChangeText={setTransactionAmount}
+                  onChangeText={handleAmountChange}
                   keyboardType="numeric"
                 />
+
+                {amountError && (
+                  <Text style={styles.errorText}>{amountError}</Text>
+                )}
+
                 {physicalType === 'contant' && (
                 <TouchableOpacity
                   style={[
@@ -308,9 +329,9 @@ export default function Home() {
                 <TouchableOpacity
                       style={[
                     styles.submitButton,
-                    (!transactionType || !transactionAmount) && { opacity: 0.5 }
+                    (isAmountValid) && { opacity: 0.5 }
                     ]}
-                    disabled={transactionType && transactionAmount ? false : true}
+                    disabled={isAmountValid}
                       onPress={submitTransaction}
                     >
                       <Text style={styles.submitButtonText}>Opslaan Transactie</Text>
@@ -428,6 +449,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
     borderRadius: 8,
     overflow: 'hidden',
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 6,
+    fontSize: 14,
   },
   progressBarFill: { height: '100%', backgroundColor: '#4CAF50' },
   progressText: { marginTop: 8, fontSize: 14, opacity: 0.8 },

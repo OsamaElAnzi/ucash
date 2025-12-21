@@ -22,7 +22,6 @@ export const selectCashOverview = createSelector(
 
     transactions.forEach(tx => {
 
-      // ✅ CONTANTLOOS = amount gebruiken
       if (tx.physicalType === 'contantlose') {
         contantloseTotal += tx.type === 'income'
           ? tx.amount
@@ -30,7 +29,6 @@ export const selectCashOverview = createSelector(
         return;
       }
 
-      // ✅ CASH = denominations verwerken
       tx.cash.forEach(item => {
         cashMap.set(
           item.denomination,
