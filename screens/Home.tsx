@@ -34,7 +34,7 @@ export default function Home() {
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | null>(null);
   const [physicalType, setPhysicalType] = useState<'contant' | 'contantlose' | null>(null);
   const [transactionName, setTransactionName] = useState('');
-  const [amountError, setAmountError] = useState<string | null>(null); 
+  const [amountError, setAmountError] = useState<string | null>(null);
   const [transactionAmount, setTransactionAmount] = useState('');
   const [remainingAmount, setRemainingAmount] = useState<number>(0);
 
@@ -118,7 +118,7 @@ export default function Home() {
         transactionName,
         Number(transactionAmount),
         finalCashSelection,
-        physicalType === 'contant' ? 'cash' : 'contantlose'
+        physicalType === 'contant' ? 'contant' : 'contantlose'
       )
     );
     closeModal();

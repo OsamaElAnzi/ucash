@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SavingsGoalScreen() {
   const [goalName, setGoalName] = useState('');
   const [goalAmount, setGoalAmount] = useState('');
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Spaardoel instellen</Text>
 
       <TextInput
@@ -31,7 +32,7 @@ export default function SavingsGoalScreen() {
       <TouchableOpacity style={[styles.button, styles.reset]}>
         <Text style={styles.resetText}>Reset spaardoel</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
