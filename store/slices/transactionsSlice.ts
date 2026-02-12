@@ -124,8 +124,12 @@ const transactionsSlice = createSlice({
         state.totalSaldo -= amount;
       }
     },
+    resetBalance: state => {
+      state.transactions = [];
+      state.totalSaldo = 0;
+    },
   },
 });
 
-export const { addTransaction, updateTransaction } = transactionsSlice.actions;
+export const { addTransaction, updateTransaction, resetBalance } = transactionsSlice.actions;
 export default transactionsSlice.reducer;

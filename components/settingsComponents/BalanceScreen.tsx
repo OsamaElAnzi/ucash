@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useI18n } from '../../i18n/LanguageContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+import { resetBalance } from '../../store/slices/transactionsSlice';
 
 export default function BalanceScreen() {
-  const [balance, setBalance] = useState(1250.75);
   const { t } = useI18n();
+  const dispatch = useDispatch();
+  const balance = useSelector((state: RootState) => state.transactions.totalSaldo);
 
   return (
     <View style={styles.container}>
@@ -12,7 +16,7 @@ export default function BalanceScreen() {
 
       <Text style={styles.balance}>EUR {balance.toFixed(2)}</Text>
 
-      <TouchableOpacity style={styles.button} onPress={() => setBalance(0)}>
+      <TouchableOpacity style={styles.button} onPress={() => dispatch(resetBalance())}>
         <Text style={styles.buttonText}>{t('balanceReset')}</Text>
       </TouchableOpacity>
     </View>
