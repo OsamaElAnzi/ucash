@@ -52,8 +52,10 @@ export default function Home() {
     (state: RootState) => state.transactions.totalSaldo
   );
 
-  const spaardoel = 2000;
-  const percentage = (totalSaldo / spaardoel) * 100;
+  const spaardoel = useSelector(
+    (state: RootState) => state.savingsGoal.goalAmount
+  );
+  const percentage = spaardoel > 0 ? (totalSaldo / spaardoel) * 100 : 0;
 
   useEffect(() => {
     setRemainingAmount(Number(transactionAmount));

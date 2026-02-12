@@ -1,10 +1,55 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+import {
+  resetSavingsGoal,
+  setSavingsGoal,
+} from '../../store/slices/savingsGoalSlice';
 
 export default function SavingsGoalScreen() {
-  const [goalName, setGoalName] = useState('');
-  const [goalAmount, setGoalAmount] = useState('');
+  const dispatch = useDispatch();
+  const { goalName: currentGoalName, goalAmount: currentGoalAmount } = useSelector(
+    (state: RootState) => state.savingsGoal
+  );
+
+  const [goalName, setGoalName] = useState(currentGoalName);
+  const [goalAmount, setGoalAmount] = useState(String(currentGoalAmount));
+
+  useEffect(() => {
+    setGoalName(currentGoalName);
+    setGoalAmount(String(currentGoalAmount));
+  }, [currentGoalAmount, currentGoalName]);
+
+  const handleSave = () => {
+    const normalizedAmount = Number(goalAmount.replace(',', '.'));
+
+    if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
+      Alert.alert('Voer een geldig bedrag in');
+      return;
+    }
+
+    dispatch(
+      setSavingsGoal({
+        goalName: goalName.trim(),
+        goalAmount: normalizedAmount,
+      })
+    );
+    Alert.alert('Spaardoel opgeslagen');
+  };
+
+  const handleReset = () => {
+    dispatch(resetSavingsGoal());
+    Alert.alert('Spaardoel gereset');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -18,18 +63,18 @@ export default function SavingsGoalScreen() {
       />
 
       <TextInput
-        placeholder="Bedrag (€)"
+        placeholder="Bedrag (EUR)"
         style={styles.input}
         keyboardType="numeric"
         value={goalAmount}
         onChangeText={setGoalAmount}
       />
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>Opslaan</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.button, styles.reset]}>
+      <TouchableOpacity style={[styles.button, styles.reset]} onPress={handleReset}>
         <Text style={styles.resetText}>Reset spaardoel</Text>
       </TouchableOpacity>
     </SafeAreaView>
