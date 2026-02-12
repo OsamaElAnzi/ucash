@@ -1,16 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useI18n } from '../../i18n/LanguageContext';
 
 export default function FAQScreen() {
+  const { t } = useI18n();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>FAQ</Text>
+      <Text style={styles.title}>{t('faqTitle')}</Text>
 
-      <Text style={styles.question}>Hoe werkt Ucash?</Text>
-      <Text style={styles.answer}>Ucash helpt je met sparen en transacties beheren.</Text>
+      <Text style={styles.question}>{t('faqQ1')}</Text>
+      <Text style={styles.answer}>{t('faqA1')}</Text>
 
-      <Text style={styles.question}>Is Ucash gratis?</Text>
-      <Text style={styles.answer}>Ja, volledig gratis.</Text>
+      <Text style={styles.question}>{t('faqQ2')}</Text>
+      <Text style={styles.answer}>{t('faqA2')}</Text>
 
     </View>
   );

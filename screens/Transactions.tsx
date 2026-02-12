@@ -12,6 +12,7 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useI18n } from '../i18n/LanguageContext';
 
 type RootStackParamList = {
   TransactionDetails: { item: Transaction };
@@ -28,6 +29,7 @@ export interface Transaction {
 
 export default function Transactions() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { t } = useI18n();
 
   // Redux transactions ophalen
   const transactions = useSelector((state: RootState) => state.transactions.transactions);
@@ -74,19 +76,19 @@ export default function Transactions() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Transacties</Text>
+      <Text style={styles.title}>{t('transactionsTitle')}</Text>
 
       <View style={styles.filterContainer}>
         <TextInput
           placeholderTextColor={'#888'}
-          placeholder="Filter op naam"
+          placeholder={t('transactionsFilterName')}
           style={styles.input}
           value={searchName}
           onChangeText={setSearchName}
         />
         <TextInput
           placeholderTextColor={'#888'}
-          placeholder="Filter op bedrag"
+          placeholder={t('transactionsFilterAmount')}
           style={styles.input}
           value={searchPrice}
           onChangeText={setSearchPrice}
@@ -97,7 +99,7 @@ export default function Transactions() {
           style={styles.input}
         >
           <Text style={{ color: searchDate ? '#000' : '#888' }}>
-            {searchDate || 'Selecteer datum'}
+            {searchDate || t('transactionsSelectDate')}
           </Text>
         </TouchableOpacity>
         {showDatePicker && (

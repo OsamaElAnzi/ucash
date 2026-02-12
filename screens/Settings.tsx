@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useI18n } from '../i18n/LanguageContext';
 
 type RootStackParamList = {
   SavingsGoal: undefined;
@@ -15,66 +16,67 @@ type RootStackParamList = {
 
 export default function Settings() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { t } = useI18n();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Instellingen</Text>
+      <Text style={styles.title}>{t('settingsTitle')}</Text>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         {/* 1. Spaardoel instellen */}
         <SettingButton
           icon="trophy-outline"
-          label="Spaardoel instellen"
+          label={t('settingsSavingsGoal')}
           onPress={() => navigation.navigate('SavingsGoal')}
         />
 
         {/* 2. Vermogen */}
         <SettingButton
           icon="wallet-outline"
-          label="Mijn vermogen"
+          label={t('settingsBalance')}
           onPress={() => navigation.navigate('Balance')}
         />
 
         {/* 3. Biljetten & munten */}
         <SettingButton
           icon="cash-outline"
-          label="Biljetten & munten overzicht"
+          label={t('settingsMoneyOverview')}
           onPress={() => navigation.navigate('MoneyOverview')}
         />
 
         {/* 4. Taalinstellingen */}
         <SettingButton
           icon="language-outline"
-          label="Taal wijzigen"
+          label={t('settingsLanguage')}
           onPress={() => navigation.navigate('Language')}
         />
 
         {/* 5. Locatie + pinautomaten */}
         <SettingButton
           icon="location-outline"
-          label="Pinautomaten in de buurt"
+          label={t('settingsAtm')}
           onPress={() => navigation.navigate('ATM')}
         />
 
         {/* 6. QR-code scanner */}
         <SettingButton
           icon="qr-code-outline"
-          label="QR-code scannen"
+          label={t('settingsQr')}
           onPress={() => navigation.navigate('QRScanner')}
         />
 
         {/* 7. FAQ */}
         <SettingButton
           icon="help-circle-outline"
-          label="FAQ"
+          label={t('settingsFaq')}
           onPress={() => navigation.navigate('FAQ')}
         />
       </ScrollView>
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>Ucash</Text>
-        <Text style={styles.footerText}>Privacy Statement</Text>
-        <Text style={styles.footerText}>Versie 1.0.0</Text>
+        <Text style={styles.footerText}>{t('settingsPrivacy')}</Text>
+        <Text style={styles.footerText}>{t('settingsVersion')}</Text>
       </View>
     </View>
   );

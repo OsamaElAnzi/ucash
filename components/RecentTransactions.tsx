@@ -2,8 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
+import { useI18n } from '../i18n/LanguageContext';
 
 export default function RecentTransactions() {
+  const { t } = useI18n();
   const transactions = useSelector(
     (state: RootState) => state.transactions.transactions
   );
@@ -13,7 +15,7 @@ export default function RecentTransactions() {
   if (lastThree.length === 0) {
     return (
       <View style={styles.container}>
-        <Text style={{ opacity: 0.6 }}>Nog geen transacties</Text>
+        <Text style={{ opacity: 0.6 }}>{t('transactionsRecentEmpty')}</Text>
       </View>
     );
   }

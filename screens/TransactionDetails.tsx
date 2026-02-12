@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Button
 import { useRoute } from '@react-navigation/native';
 import { Transaction } from './Transactions'; // Importeer het type
 import { useDispatch, useSelector } from 'react-redux';
+import { useI18n } from '../i18n/LanguageContext';
 
 type TransactionDetailsRouteParams = {
   item: Transaction;
@@ -10,13 +11,14 @@ type TransactionDetailsRouteParams = {
 
 export default function TransactionDetails() {
   const route = useRoute();
+  const { t } = useI18n();
   const { item } = route.params as TransactionDetailsRouteParams;
    const dispatch = useDispatch();
 
   if (!item) {
     return (
       <View style={styles.container}>
-        <Text>Geen transactie gevonden</Text>
+        <Text>{t('transactionsNoTransactionFound')}</Text>
       </View>
     );
   }
@@ -36,27 +38,27 @@ export default function TransactionDetails() {
   }
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Transactie Details</Text>
+      <Text style={styles.title}>{t('transactionsDetailsTitle')}</Text>
 
       <View style={styles.box}>
-        <Text style={styles.label}>Naam</Text>
+        <Text style={styles.label}>{t('transactionsLabelName')}</Text>
         <TextInput style={styles.value}>{item.name}</TextInput>
 
-        <Text style={styles.label}>Prijs</Text>
+        <Text style={styles.label}>{t('transactionsLabelPrice')}</Text>
         <TextInput style={styles.value}>€{item.amount?.toFixed(2) ?? item.amount}</TextInput>
 
-        <Text style={styles.label}>Datum</Text>
+        <Text style={styles.label}>{t('transactionsLabelDate')}</Text>
         <Text style={styles.value}>{item.createdAt ?? item.createdAt}</Text>
 
-        <Text style={styles.label}>Type</Text>
+        <Text style={styles.label}>{t('transactionsLabelType')}</Text>
         <TextInput style={styles.value}>{item.type}</TextInput>
 
-        <Text style={styles.label}>Betaalwijze</Text>
+        <Text style={styles.label}>{t('transactionsLabelPaymentMethod')}</Text>
         <TextInput style={styles.value}>
-          {item.physicalType === 'contant' ? 'Contant' : 'Contantlose'}
+          {item.physicalType === 'contant' ? t('transactionsPaymentCash') : t('transactionsPaymentCashless')}
         </TextInput>
         <TouchableOpacity>
-          <Button title="Opslaan" onPress={() => {}} />
+          <Button title={t('transactionsSave')} onPress={() => {}} />
         </TouchableOpacity>
       </View>
     </ScrollView>

@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addTransaction } from '../store/slices/transactionsSlice';
 import { RootState } from '../store/store';
 import { selectCashOverview } from '../store/selectors/transactionsSelectors';
+import { useI18n } from '../i18n/LanguageContext';
 
 
 
@@ -27,6 +28,7 @@ const screenHeight = Dimensions.get('window').height;
 
 export default function Home() {
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
   const cashOverview = useSelector((state: RootState) => selectCashOverview(state));
@@ -142,7 +144,7 @@ export default function Home() {
 
   const addCash = (denomination: string, manualCount?: number) => {
     if (remainingAmount <= 0 && manualCount === undefined) {
-      Alert.alert("Geen bedrag meer over om te verdelen");
+      Alert.alert(t('homeNoAmountLeft'));
       return;
     }
 
@@ -152,14 +154,14 @@ export default function Home() {
     if (manualCount !== undefined) {
       count = manualCount;
       if (count * value > remainingAmount * 100) {
-        Alert.alert("Te veel voor het resterende bedrag");
+        Alert.alert(t('homeTooMuchForRemaining'));
         return;
       }
     } else {
       const amountInCents = Math.round(remainingAmount * 100);
       count = Math.floor(amountInCents / value);
       if (count <= 0) {
-        Alert.alert(`Dit biljet/munt is te groot voor het resterende bedrag`);
+        Alert.alert(t('homeDenominationTooLarge'));
         return;
       }
     }
@@ -185,14 +187,14 @@ const handleAmountChange = (text: string) => {
 const validateAmount = (text: string) => {
   // Alleen cijfers en max 1 punt
   if (!/^\d*\.?\d*$/.test(text)) {
-    setAmountError('Gebruik alleen cijfers en één punt (.)');
+    setAmountError(t('homeAmountInvalidChars'));
     return;
   }
 
   // Max 2 decimalen
   const parts = text.split('.');
   if (parts[1] && parts[1].length > 2) {
-    setAmountError('Maximaal 2 cijfers na de punt');
+    setAmountError(t('homeAmountMaxDecimals'));
     return;
   }
 
@@ -210,7 +212,7 @@ const validateAmount = (text: string) => {
           <View style={[styles.progressBarFill, { width: `${percentage}%` }]} />
         </View>
         <Text style={styles.progressText}>
-          {percentage.toFixed(0)}% van €{spaardoel}
+          {percentage.toFixed(0)}% {t('homeProgressOf')} €{spaardoel}
         </Text>
       </View>
       <RecentTransactions />
@@ -238,7 +240,7 @@ const validateAmount = (text: string) => {
           >
             {!showCashOptions ? (
               <>
-                <Text style={styles.modalTitle}>Nieuwe Transactie</Text>
+                <Text style={styles.modalTitle}>{t('homeNewTransaction')}</Text>
 
                 {/* Kies type transactie */}
                 <View style={styles.typeContainer}>
@@ -250,7 +252,7 @@ const validateAmount = (text: string) => {
                     onPress={() => setPhysicalType('contant')}
                   >
                     <Ionicons name="cash-outline" size={28} />
-                    <Text style={styles.typeText}>Contant</Text>
+                    <Text style={styles.typeText}>{t('homeCash')}</Text>
 
                   </TouchableOpacity>
 
@@ -262,7 +264,7 @@ const validateAmount = (text: string) => {
                     onPress={() => setPhysicalType('contantlose')}
                   >
                     <Ionicons name="card-outline" size={28} />
-                    <Text style={styles.typeText}>Contant lose</Text>
+                    <Text style={styles.typeText}>{t('homeCashless')}</Text>
                   </TouchableOpacity>
                 </View>
                 <View style={styles.typeContainer}>
@@ -274,7 +276,7 @@ const validateAmount = (text: string) => {
                     onPress={() => setTransactionType('income')}
                   >
                     <Ionicons name="arrow-down-circle-outline" size={28} color="#4CAF50" />
-                    <Text style={styles.typeText}>Inkomen</Text>
+                    <Text style={styles.typeText}>{t('homeIncome')}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -285,14 +287,14 @@ const validateAmount = (text: string) => {
                     onPress={() => setTransactionType('expense')}
                   >
                     <Ionicons name="arrow-up-circle-outline" size={28} color="#F44336" />
-                    <Text style={styles.typeText}>Uitgave</Text>
+                    <Text style={styles.typeText}>{t('homeExpense')}</Text>
                   </TouchableOpacity>
                 </View>
 
                 {/* Naam en bedrag */}
                 <TextInput
                   style={styles.input}
-                  placeholder="Naam van transactie"
+                  placeholder={t('homeTransactionNamePlaceholder')}
                   placeholderTextColor="#888"
                   value={transactionName}
                   onChangeText={setTransactionName}
@@ -302,7 +304,7 @@ const validateAmount = (text: string) => {
                     styles.input,
                     amountError && { borderColor: 'red' },
                   ]}
-                  placeholder="Bedrag"
+                  placeholder={t('homeAmountPlaceholder')}
                   placeholderTextColor="#888"
                   value={transactionAmount}
                   onChangeText={handleAmountChange}
@@ -323,7 +325,7 @@ const validateAmount = (text: string) => {
                   onPress={() => setShowCashOptions(true)}
                 >
                   <Text style={styles.submitButtonText}>
-                    Volgende: Biljetten/Munten
+                    {t('homeNextBillsCoins')}
                   </Text>
                 </TouchableOpacity>
                 )}
@@ -336,26 +338,26 @@ const validateAmount = (text: string) => {
                     disabled={isAmountValid}
                       onPress={submitTransaction}
                     >
-                      <Text style={styles.submitButtonText}>Opslaan Transactie</Text>
+                      <Text style={styles.submitButtonText}>{t('homeSaveTransaction')}</Text>
                     </TouchableOpacity>
                 )}
               </>
             ) : (
               <>
-                <Text style={styles.modalTitle}>Kies Biljetten of Munten</Text>
+                <Text style={styles.modalTitle}>{t('homeChooseBillsOrCoins')}</Text>
                 {!cashType ? (
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <TouchableOpacity
                       style={styles.typeButton}
                       onPress={() => setCashType('biljetten')}
                     >
-                      <Text>Biljetten</Text>
+                      <Text>{t('homeBills')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.typeButton}
                       onPress={() => setCashType('munten')}
                     >
-                      <Text>Munten</Text>
+                      <Text>{t('homeCoins')}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -391,7 +393,7 @@ const validateAmount = (text: string) => {
                               width: 60,
                               textAlign: 'center',
                             }}
-                            placeholder="Aantal"
+                            placeholder={t('homeCountPlaceholder')}
                             placeholderTextColor={'#888'}
                             keyboardType="numeric"
                             value={countInputs[item] || ''}
@@ -412,7 +414,7 @@ const validateAmount = (text: string) => {
 
 
 
-                    <Text style={{ fontWeight: '700', marginTop: 10 }}>Overzicht:</Text>
+                    <Text style={{ fontWeight: '700', marginTop: 10 }}>{t('homeOverview')}</Text>
                     {cashSelection.map(c => (
                       <View key={c.denomination} style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 4 }}>
                         <Text>{c.denomination} × {c.count}</Text>
@@ -428,7 +430,7 @@ const validateAmount = (text: string) => {
                       style={[styles.submitButton, { marginTop: 10 }]}
                       onPress={submitTransaction}
                     >
-                      <Text style={styles.submitButtonText}>Opslaan Transactie</Text>
+                      <Text style={styles.submitButtonText}>{t('homeSaveTransaction')}</Text>
                     </TouchableOpacity>
                   </>
                 )}

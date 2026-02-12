@@ -1,12 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useI18n } from '../../i18n/LanguageContext';
 
 export default function QRScannerScreen() {
+  const { t } = useI18n();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>QR-code scannen</Text>
+      <Text style={styles.title}>{t('qrTitle')}</Text>
 
-      <Text>QR scanner view komt hier</Text>
+      <Text>{t('qrPlaceholder')}</Text>
     </View>
   );
 }

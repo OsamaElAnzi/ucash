@@ -1,12 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useI18n } from '../../i18n/LanguageContext';
 
 export default function ATMScreen() {
+  const { t } = useI18n();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Pinautomaten in de buurt</Text>
+      <Text style={styles.title}>{t('atmTitle')}</Text>
 
-      <Text>Locatie + navigatie functionaliteit komt hier</Text>
+      <Text>{t('atmPlaceholder')}</Text>
     </View>
   );
 }

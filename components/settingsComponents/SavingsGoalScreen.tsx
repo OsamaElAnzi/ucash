@@ -14,9 +14,11 @@ import {
   resetSavingsGoal,
   setSavingsGoal,
 } from '../../store/slices/savingsGoalSlice';
+import { useI18n } from '../../i18n/LanguageContext';
 
 export default function SavingsGoalScreen() {
   const dispatch = useDispatch();
+  const { t } = useI18n();
   const { goalName: currentGoalName, goalAmount: currentGoalAmount } = useSelector(
     (state: RootState) => state.savingsGoal
   );
@@ -33,7 +35,7 @@ export default function SavingsGoalScreen() {
     const normalizedAmount = Number(goalAmount.replace(',', '.'));
 
     if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
-      Alert.alert('Voer een geldig bedrag in');
+      Alert.alert(t('savingsInvalidAmount'));
       return;
     }
 
@@ -43,27 +45,27 @@ export default function SavingsGoalScreen() {
         goalAmount: normalizedAmount,
       })
     );
-    Alert.alert('Spaardoel opgeslagen');
+    Alert.alert(t('savingsSaved'));
   };
 
   const handleReset = () => {
     dispatch(resetSavingsGoal());
-    Alert.alert('Spaardoel gereset');
+    Alert.alert(t('savingsResetDone'));
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Spaardoel instellen</Text>
+      <Text style={styles.title}>{t('savingsTitle')}</Text>
 
       <TextInput
-        placeholder="Naam van spaardoel"
+        placeholder={t('savingsPlaceholderName')}
         style={styles.input}
         value={goalName}
         onChangeText={setGoalName}
       />
 
       <TextInput
-        placeholder="Bedrag (EUR)"
+        placeholder={t('savingsPlaceholderAmount')}
         style={styles.input}
         keyboardType="numeric"
         value={goalAmount}
@@ -71,11 +73,11 @@ export default function SavingsGoalScreen() {
       />
 
       <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Text style={styles.buttonText}>Opslaan</Text>
+        <Text style={styles.buttonText}>{t('savingsSave')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.button, styles.reset]} onPress={handleReset}>
-        <Text style={styles.resetText}>Reset spaardoel</Text>
+        <Text style={styles.resetText}>{t('savingsReset')}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
