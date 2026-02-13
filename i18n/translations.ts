@@ -58,6 +58,14 @@ export const translations = {
 
     qrTitle: 'QR-code scannen',
     qrPlaceholder: 'QR scanner view komt hier',
+    qrNoPermission: 'Camera toestemming is nodig om QR-codes te scannen.',
+    qrGrantPermission: 'Geef camera toestemming',
+    qrNoDevice: 'Geen camera gevonden op dit apparaat.',
+    qrScannerHint: 'Richt de camera op een QR-code',
+    qrScannedLabel: 'Gescande inhoud',
+    qrScanAgain: 'Scan opnieuw',
+    qrOpenLink: 'Open link',
+    qrOpenLinkError: 'Kon link niet openen',
 
     faqTitle: 'FAQ',
     faqQ1: 'Hoe werkt Ucash?',
@@ -159,6 +167,14 @@ export const translations = {
 
     qrTitle: 'Scan QR code',
     qrPlaceholder: 'QR scanner view will be here',
+    qrNoPermission: 'Camera permission is required to scan QR codes.',
+    qrGrantPermission: 'Grant camera permission',
+    qrNoDevice: 'No camera device found.',
+    qrScannerHint: 'Point your camera at a QR code',
+    qrScannedLabel: 'Scanned content',
+    qrScanAgain: 'Scan again',
+    qrOpenLink: 'Open link',
+    qrOpenLinkError: 'Could not open link',
 
     faqTitle: 'FAQ',
     faqQ1: 'How does Ucash work?',
