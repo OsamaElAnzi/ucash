@@ -4,6 +4,7 @@ import { useI18n } from '../../i18n/LanguageContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import { resetBalance } from '../../store/slices/transactionsSlice';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BalanceScreen() {
   const { t } = useI18n();
@@ -11,7 +12,7 @@ export default function BalanceScreen() {
   const balance = useSelector((state: RootState) => state.transactions.totalSaldo);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>{t('balanceTitle')}</Text>
 
       <Text style={styles.balance}>EUR {balance.toFixed(2)}</Text>
@@ -19,7 +20,7 @@ export default function BalanceScreen() {
       <TouchableOpacity style={styles.button} onPress={() => dispatch(resetBalance())}>
         <Text style={styles.buttonText}>{t('balanceReset')}</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -14,6 +14,7 @@ import { RootState } from '../store/store';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useI18n } from '../i18n/LanguageContext';
 import { Transaction } from '../store/types/Transaction';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type RootStackParamList = {
   TransactionDetails: { item: Transaction };
@@ -67,7 +68,7 @@ export default function Transactions() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>{t('transactionsTitle')}</Text>
 
       <View style={styles.filterContainer}>
@@ -110,7 +111,7 @@ export default function Transactions() {
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 120 }}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

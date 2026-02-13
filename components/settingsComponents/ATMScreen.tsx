@@ -10,7 +10,7 @@ import {
   FlatList,
   TextInput,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useI18n } from '../../i18n/LanguageContext';
 
 type AtmPoint = {
@@ -113,6 +113,7 @@ export default function ATMScreen() {
   const [clientFilter, setClientFilter] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<AtmPoint[]>([]);
+  const insets = useSafeAreaInsets();
 
   const openNavigation = async (latitude: number, longitude: number) => {
     const googleNav = `google.navigation:q=${latitude},${longitude}`;
@@ -262,7 +263,7 @@ export default function ATMScreen() {
   }, [clientFilter, results]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingBottom: 90 + insets.bottom }]}>
       <Text style={styles.title}>{t('atmTitle')}</Text>
       <Text style={styles.subtitle}>{t('atmPlaceholder')}</Text>
 

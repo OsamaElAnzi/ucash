@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { selectCashOverview } from '../../store/selectors/transactionsSelectors';
 import { useI18n } from '../../i18n/LanguageContext';
 
@@ -13,6 +13,7 @@ type CashItem = {
 
 export default function MoneyOverviewScreen() {
   const { t } = useI18n();
+  const insets = useSafeAreaInsets();
   const [type, setType] = useState<'coins' | 'bills' | 'contantlose'>('bills');
 
   const cashOverview = useSelector(selectCashOverview);
@@ -35,7 +36,7 @@ export default function MoneyOverviewScreen() {
     { denomination: '50c', value: 0.5, count: 0 },
     { denomination: '\u20AC1', value: 1, count: 0 },
     { denomination: '\u20AC2', value: 2, count: 0 },
-  ];  
+  ];
 
   const mergeData = (master: CashItem[], data: CashItem[]): CashItem[] =>
     master.map(item => {
@@ -54,7 +55,7 @@ export default function MoneyOverviewScreen() {
   const totalAmount = data.reduce((sum, item) => sum + item.value * item.count, 0);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingBottom: 90 + insets.bottom }]}>
       <Text style={styles.title}>{t('moneyOverviewTitle')}</Text>
 
       <View style={styles.switcher}>
@@ -84,7 +85,7 @@ export default function MoneyOverviewScreen() {
         </TouchableOpacity>
       </View>
 
-      <SafeAreaView style={styles.table}>
+      <View style={styles.table}>
         <View style={[styles.row, styles.headerRow]}>
           <Text style={[styles.cell, styles.headerCell]}>{t('moneyOverviewDenomination')}</Text>
           <Text style={[styles.cell, styles.headerCell]}>{t('moneyOverviewCount')}</Text>
@@ -96,14 +97,14 @@ export default function MoneyOverviewScreen() {
             <View style={styles.row}>
               <Text style={styles.cell}>{t('moneyOverviewCashless')}</Text>
               <Text style={styles.cell}>{t('moneyOverviewDash')}</Text>
-              <Text style={styles.cell}>{contantloseTotal.toFixed(2)}</Text>
+              <Text style={styles.cell}>EUR {contantloseTotal.toFixed(2)}</Text>
             </View>
           ) : (
             data.map(item => (
               <View key={item.denomination} style={styles.row}>
                 <Text style={styles.cell}>{item.denomination}</Text>
                 <Text style={styles.cell}>{item.count}</Text>
-                <Text style={styles.cell}>{(item.value * item.count).toFixed(2)}</Text>
+                <Text style={styles.cell}>EUR {(item.value * item.count).toFixed(2)}</Text>
               </View>
             ))
           )}
@@ -113,44 +114,53 @@ export default function MoneyOverviewScreen() {
           <Text style={styles.totalText}>{t('moneyOverviewTotalLabel')}</Text>
           <Text style={styles.totalText}></Text>
           {type === 'contantlose' ? (
-            <Text style={styles.totalText}>{totalAmountCard.toFixed(2)} EUR</Text>
+            <Text style={styles.totalText}>EUR {totalAmountCard.toFixed(2)}</Text>
           ) : (
-            <Text style={styles.totalText}>{totalAmount.toFixed(2)} EUR</Text>
+            <Text style={styles.totalText}>EUR {totalAmount.toFixed(2)}</Text>
           )}
         </View>
-      </SafeAreaView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f7f7f7', padding: 20 },
-  title: { fontSize: 28, fontWeight: '700', marginBottom: 20, color: '#222' },
+  container: { flex: 1, backgroundColor: '#F9F9F9', padding: 20 },
+  title: { fontSize: 30, fontWeight: '700', marginBottom: 22, color: '#111' },
 
-  switcher: { flexDirection: 'row', marginBottom: 20, justifyContent: 'center' },
+  switcher: { flexDirection: 'row', marginBottom: 16, justifyContent: 'center', gap: 8 },
   switchButton: {
     flex: 1,
-    paddingVertical: 10,
-    marginHorizontal: 5,
+    paddingVertical: 11,
     borderRadius: 12,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e6e6e6',
     alignItems: 'center',
   },
-  activeSwitch: { backgroundColor: '#1e88e5' },
-  switchText: { fontSize: 16, fontWeight: '500', color: '#555' },
-  activeText: { color: '#fff', fontWeight: '700' },
+  activeSwitch: { backgroundColor: '#111', borderColor: '#111' },
+  switchText: { fontSize: 15, fontWeight: '600', color: '#555' },
+  activeText: { color: '#fff' },
 
-  table: { flex: 1, borderRadius: 12, overflow: 'hidden', backgroundColor: '#fff' },
+  table: {
+    flex: 1,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ececec',
+    elevation: 2,
+  },
   row: {
     flexDirection: 'row',
-    paddingVertical: 14,
+    paddingVertical: 13,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  headerRow: { backgroundColor: '#f0f2f5', borderBottomWidth: 2 },
-  cell: { flex: 1, textAlign: 'center', fontSize: 16, color: '#333' },
-  headerCell: { fontWeight: '700', color: '#666' },
+  headerRow: { backgroundColor: '#f6f6f6', borderBottomWidth: 1, borderBottomColor: '#e7e7e7' },
+  cell: { flex: 1, textAlign: 'center', fontSize: 15, color: '#2a2a2a', paddingHorizontal: 6 },
+  headerCell: { fontWeight: '700', color: '#666', fontSize: 13 },
 
-  totalRow: { backgroundColor: '#1e88e5' },
-  totalText: { flex: 1, textAlign: 'center', fontWeight: '700', color: '#fff', fontSize: 16 },
+  totalRow: { backgroundColor: '#111', borderBottomWidth: 0 },
+  totalText: { flex: 1, textAlign: 'center', fontWeight: '700', color: '#fff', fontSize: 15 },
 });
