@@ -13,19 +13,11 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useI18n } from '../i18n/LanguageContext';
+import { Transaction } from '../store/types/Transaction';
 
 type RootStackParamList = {
   TransactionDetails: { item: Transaction };
 };
-
-export interface Transaction {
-  id: string;
-  name: string;
-  amount: number;
-  createdAt: string;
-  type: 'income' | 'expense';
-  physicalType: 'contant' | 'contantlose';
-}
 
 export default function Transactions() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
