@@ -21,19 +21,31 @@ const transactionsSlice = createSlice({
 
         // Check of het een expense is
         if (tx.type === 'expense') {
-          // Controleer of er genoeg cash is van elke denomination
-          const cashOverview = state.transactions.reduce((map, t) => {
-            t.cash.forEach(c => {
-              map[c.denomination] =
-                (map[c.denomination] || 0) +
-                (t.type === 'income' ? c.count : -c.count);
-            });
-            return map;
-          }, {} as Record<string, number>);
+          if (tx.physicalType === 'contantlose') {
+            const contantloseBalance = state.transactions.reduce((total, t) => {
+              if (t.physicalType !== 'contantlose') return total;
+              return total + (t.type === 'income' ? t.amount : -t.amount);
+            }, 0);
 
-          for (let item of tx.cash) {
-            if ((cashOverview[item.denomination] || 0) < item.count) {
-              throw new Error(`Je hebt niet genoeg ${item.denomination}`);
+            if (contantloseBalance < tx.amount) {
+              throw new Error('Je hebt niet genoeg contantlose saldo');
+            }
+          } else {
+            // Controleer of er genoeg cash is van elke denomination
+            const cashOverview = state.transactions.reduce((map, t) => {
+              if (t.physicalType !== 'contant') return map;
+              t.cash.forEach(c => {
+                map[c.denomination] =
+                  (map[c.denomination] || 0) +
+                  (t.type === 'income' ? c.count : -c.count);
+              });
+              return map;
+            }, {} as Record<string, number>);
+
+            for (const item of tx.cash) {
+              if ((cashOverview[item.denomination] || 0) < item.count) {
+                throw new Error(`Je hebt niet genoeg ${item.denomination}`);
+              }
             }
           }
         }
@@ -93,19 +105,30 @@ const transactionsSlice = createSlice({
 
       // 2. Cash validatie opnieuw bij expense
       if (type === 'expense') {
-        const cashOverview = state.transactions.reduce((map, t) => {
-          if (t.id === id) return map; // sla huidige over (we vervangen hem)
-          t.cash.forEach(c => {
-            map[c.denomination] =
-              (map[c.denomination] || 0) +
-              (t.type === 'income' ? c.count : -c.count);
-          });
-          return map;
-        }, {} as Record<string, number>);
+        if (physicalType === 'contantlose') {
+          const contantloseBalance = state.transactions.reduce((total, t) => {
+            if (t.id === id || t.physicalType !== 'contantlose') return total;
+            return total + (t.type === 'income' ? t.amount : -t.amount);
+          }, 0);
 
-        for (let item of cash) {
-          if ((cashOverview[item.denomination] || 0) < item.count) {
-            throw new Error(`Je hebt niet genoeg ${item.denomination}`);
+          if (contantloseBalance < amount) {
+            throw new Error('Je hebt niet genoeg contantlose saldo');
+          }
+        } else {
+          const cashOverview = state.transactions.reduce((map, t) => {
+            if (t.id === id || t.physicalType !== 'contant') return map; // sla huidige over (we vervangen hem)
+            t.cash.forEach(c => {
+              map[c.denomination] =
+                (map[c.denomination] || 0) +
+                (t.type === 'income' ? c.count : -c.count);
+            });
+            return map;
+          }, {} as Record<string, number>);
+
+          for (const item of cash) {
+            if ((cashOverview[item.denomination] || 0) < item.count) {
+              throw new Error(`Je hebt niet genoeg ${item.denomination}`);
+            }
           }
         }
       }
