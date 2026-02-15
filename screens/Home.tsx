@@ -204,7 +204,7 @@ const validateAmount = (text: string) => {
   return (
     <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
       {/* Totale saldo */}
-      <Text style={styles.saldo}>€ {totalSaldo}</Text>
+      <Text style={styles.saldo}>€ {totalSaldo.toFixed(2)}</Text>
 
       {/* Progress Bar */}
       <View style={styles.progressContainer}>
