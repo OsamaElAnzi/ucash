@@ -1,4 +1,16 @@
 {
   "name": "ucash",
-  "displayName": "ucash"
+  "displayName": "ucash",
+  "expo": {
+    "ios": {
+      "bundleIdentifier": "com.osama.ucash"
+    },
+    "name": "ucash",
+    "slug": "ucash",
+    "extra": {
+      "eas": {
+        "projectId": "4815f7ea-df14-4353-9d87-788c26912d96"
+      }
+    }
+  }
 }
