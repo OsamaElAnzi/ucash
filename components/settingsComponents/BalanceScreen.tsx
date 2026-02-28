@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useI18n } from '../../i18n/LanguageContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/store';

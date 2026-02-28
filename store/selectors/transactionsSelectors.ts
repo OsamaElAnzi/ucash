@@ -1,6 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { CashItem } from '../types/Transaction';
 
 const parseDenomination = (denomination: string): number => {
   if (denomination.includes('c')) {

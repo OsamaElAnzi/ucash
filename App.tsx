@@ -2,7 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from './navigation/AppNavigator';
 import NavigationBar from './components/NavigationBar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   AppState,
@@ -153,7 +153,7 @@ export default function App() {
     }
   };
 
-  const runSplashSequence = () => {
+  const runSplashSequence = useCallback(() => {
     clearHideTimer();
     splashOpacity.stopAnimation();
     splashOpacity.setValue(1);
@@ -167,7 +167,7 @@ export default function App() {
         useNativeDriver: true,
       }).start(() => setShowSplash(false));
     }, SPLASH_DURATION_MS);
-  };
+  }, [splashOpacity]);
 
   useEffect(() => {
     runSplashSequence();
@@ -189,7 +189,7 @@ export default function App() {
       appStateSubscription.remove();
       clearHideTimer();
     };
-  }, [splashOpacity]);
+  }, [runSplashSequence]);
 
   return (
     <Provider store={store}>

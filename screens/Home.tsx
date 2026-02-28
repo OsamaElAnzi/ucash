@@ -19,7 +19,6 @@ import RecentTransactions from '../components/RecentTransactions';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTransaction } from '../store/slices/transactionsSlice';
 import { RootState } from '../store/store';
-import { selectCashOverview } from '../store/selectors/transactionsSelectors';
 import { useI18n } from '../i18n/LanguageContext';
 
 
@@ -31,7 +30,6 @@ export default function Home() {
   const { t } = useI18n();
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
-  const cashOverview = useSelector((state: RootState) => selectCashOverview(state));
 
   const [transactionType, setTransactionType] = useState<'income' | 'expense' | null>(null);
   const [physicalType, setPhysicalType] = useState<'contant' | 'contantlose' | null>(null);

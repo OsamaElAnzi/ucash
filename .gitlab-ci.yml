@@ -1,0 +1,130 @@
+stages:
+  - validate
+  - ios_build
+  - ios_deploy
+
+default:
+  interruptible: true
+
+variables:
+  NODE_VERSION: "20"
+  LANG: "en_US.UTF-8"
+  LC_ALL: "en_US.UTF-8"
+  IOS_SCHEME: "ucash"
+  IOS_WORKSPACE: "ios/ucash.xcworkspace"
+  IOS_ARCHIVE_PATH: "$CI_PROJECT_DIR/build/ucash.xcarchive"
+  IOS_EXPORT_PATH: "$CI_PROJECT_DIR/build/export"
+
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+lint_and_typecheck:
+  stage: validate
+  image: node:20-bookworm
+  before_script:
+    - npm ci
+  script:
+    - npx tsc --noEmit
+    - npm run lint
+
+unit_tests:
+  stage: validate
+  image: node:20-bookworm
+  before_script:
+    - npm ci
+  script:
+    - npm test -- --runInBand
+
+ios_archive:
+  stage: ios_build
+  tags:
+    - macos
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  before_script:
+    - node --version
+    - ruby --version
+    - npm ci
+    - bundle install
+    - bundle exec pod install --project-directory=ios
+  script:
+    - |
+      cat > ios/ExportOptions.plist <<EOF
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>method</key>
+        <string>app-store-connect</string>
+        <key>signingStyle</key>
+        <string>automatic</string>
+        <key>teamID</key>
+        <string>${APPLE_TEAM_ID}</string>
+        <key>uploadBitcode</key>
+        <false/>
+        <key>uploadSymbols</key>
+        <true/>
+      </dict>
+      </plist>
+      EOF
+    - mkdir -p "$HOME/private_keys"
+    - echo "$APP_STORE_CONNECT_API_KEY_P8" > "$HOME/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+    - >
+      xcodebuild
+      -workspace "$IOS_WORKSPACE"
+      -scheme "$IOS_SCHEME"
+      -configuration Release
+      -archivePath "$IOS_ARCHIVE_PATH"
+      -allowProvisioningUpdates
+      -authenticationKeyPath "$HOME/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+      -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID"
+      -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
+      archive
+    - >
+      xcodebuild
+      -exportArchive
+      -archivePath "$IOS_ARCHIVE_PATH"
+      -exportPath "$IOS_EXPORT_PATH"
+      -exportOptionsPlist ios/ExportOptions.plist
+      -allowProvisioningUpdates
+      -authenticationKeyPath "$HOME/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+      -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID"
+      -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
+    - test -f "$IOS_EXPORT_PATH/ucash.ipa"
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - build/export/*.ipa
+      - build/export/*.dSYM.zip
+
+ios_testflight:
+  stage: ios_deploy
+  tags:
+    - macos
+  needs:
+    - job: ios_archive
+      artifacts: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+  script:
+    - mkdir -p "$HOME/private_keys"
+    - echo "$APP_STORE_CONNECT_API_KEY_P8" > "$HOME/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+    - >
+      xcrun altool
+      --upload-app
+      --type ios
+      --file "$IOS_EXPORT_PATH/ucash.ipa"
+      --apiKey "$APP_STORE_CONNECT_KEY_ID"
+      --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
