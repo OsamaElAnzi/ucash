@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -59,7 +59,7 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Ucash gebruikt je locatie om pinautomaten in de buurt te tonen.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Gebruik de camera om QR-codes te scannen.</string>
 	<key>UILaunchStoryboardName</key>
@@ -78,3 +78,5 @@
 	<false/>
 </dict>
 </plist>
+
+
